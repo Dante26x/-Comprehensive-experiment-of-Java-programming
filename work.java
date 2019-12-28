@@ -17,8 +17,13 @@ import java.io.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.category.DefaultCategoryDataset;
 import java.util.*;
 
@@ -620,6 +625,7 @@ public class work extends JFrame {
             close = new JButton("关闭");
             jPanel.add(close, BorderLayout.SOUTH);
             add(jPanel);
+            this.setResizable(false);
         }
 
         //从数字翻译到英语
@@ -817,6 +823,7 @@ public class work extends JFrame {
             box.add(box2);
             box.add(box3);
             getContentPane().add(box);
+            this.setResizable(false);
         }
 
         //读入文本框内容并处理
@@ -840,6 +847,8 @@ public class work extends JFrame {
             str = str.replace(')', ' ');//将右括号替换成空格，输出改变后的结果
             System.out.println(str.replace(" – ", " "));
             str = str.replace(" – ", " ");//将连接符替换成空格，输出改变后的结果
+            str = str.replace(" = ", " ");//将连接符替换成空格，输出改变后的结果
+            str = str.replace(" # ", " ");//将连接符替换成空格，输出改变后的结果
             //注意：此时还未处理单引号
             System.out.println(str);//输出拼接后的结果
             System.out.println();
@@ -906,18 +915,27 @@ public class work extends JFrame {
         private void chart() throws IOException {
             DefaultCategoryDataset defaultCategoryDataset = new DefaultCategoryDataset();
             for (int i = 0; i < total.length; i++) {
-                defaultCategoryDataset.setValue(total[i], ""/*String.valueOf(letter[26+i])*/, String.valueOf(letter[26 + i]));
+                defaultCategoryDataset.setValue(total[i], "字母", String.valueOf(letter[26 + i]));
             }
-            JFreeChart chart = ChartFactory.createBarChart("26个字母开头的单词数统计", "字母", "单词数量", defaultCategoryDataset, PlotOrientation.VERTICAL, true, false, false);
+            JFreeChart chart = ChartFactory.createBarChart("26个字母开头的单词数统计", "", "单词数量", defaultCategoryDataset, PlotOrientation.VERTICAL, true, false, false);
             CategoryPlot plot = (CategoryPlot) chart.getPlot();
             plot.getDomainAxis().setLabelFont(ta.getFont());
             plot.getDomainAxis().setTickLabelFont(ta.getFont());
             plot.getRangeAxis().setLabelFont(ta.getFont());
+            BarRenderer customBar= (BarRenderer) plot.getRenderer();
+            customBar.setDataBoundsIncludesVisibleSeriesOnly(true);
+            customBar.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+            customBar.setDefaultItemLabelsVisible(true);
+            customBar.setDefaultItemLabelPaint(Color.BLUE);
+            customBar.setDefaultItemLabelFont(new Font("黑体", Font.PLAIN, 10));
+            customBar.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.CENTER));
+            customBar.setItemLabelAnchorOffset(4);
+            plot.setRenderer(customBar);
             /*------这句代码解决了底部汉字乱码的问题-----------*/
             chart.getLegend().setItemFont(new Font("宋体", Font.PLAIN, 12));
             /*------这句代码解决了标题汉字乱码的问题-----------*/
-            chart.getTitle().setFont(new Font("宋体", Font.PLAIN, 12));
-            ChartUtils.saveChartAsJPEG(new File("chart.JPEG"), chart, 500, 300);
+            chart.getTitle().setFont(new Font("宋体", Font.PLAIN, 10));
+            ChartUtils.saveChartAsJPEG(new File("chart.JPEG"), chart, 500, 310);
         }
     }
 
@@ -954,6 +972,7 @@ public class work extends JFrame {
             jPanel.add(judge);
             jPanel.add(close);
             add(jPanel);
+            this.setResizable(false);
         }
 
         //添加监听器
@@ -1088,12 +1107,7 @@ public class work extends JFrame {
             inti();
         }
 
-        private void centerWindow() {
-            Toolkit tk = getToolkit();
-            Dimension dm = tk.getScreenSize();
-            setLocation((int) (dm.getWidth() - getWidth()) / 2, (int) (dm.getHeight() - getHeight()) / 2);
-        }
-
+        //初始化
         private void inti(){
             JFrame frm= new JFrame("文本文件求和");
             final JProgressBar aJProgressBar = new JProgressBar();
@@ -1102,8 +1116,9 @@ public class work extends JFrame {
             aJProgressBar.setForeground(Color.blue);
             final JButton btnStart = new JButton("开始");
             final JButton btnStop = new JButton("取消");
-            frm.setSize(300,100);
-            centerWindow();
+            Toolkit tk = frm.getToolkit();
+            Dimension dm = tk.getScreenSize();
+            frm.setLocation((int) (dm.getWidth() - getWidth()) / 2, (int) (dm.getHeight() - getHeight()) / 2);
 
             //添加监听器
             ActionListener actionListener = new ActionListener() {
@@ -1148,6 +1163,7 @@ public class work extends JFrame {
             frm.setSize(300, 100);
             //frm.pack();
             frm.setVisible(true);
+            frm.setResizable(false);
         }
     }
 
@@ -1358,6 +1374,7 @@ public class work extends JFrame {
                 jPanel.add(approveButton);
                 cancelButton=new JButton("取消");
                 jPanel.add(cancelButton);
+                this.setResizable(false);
             }
 
             //添加监听器
@@ -1446,6 +1463,7 @@ public class work extends JFrame {
                 jPanel.add(approveButton);
                 cancelButton=new JButton("取消");
                 jPanel.add(cancelButton);
+                this.setResizable(false);
             }
 
             //修改数据实现
@@ -1551,6 +1569,7 @@ public class work extends JFrame {
                 jPanel.add(searchButton);
                 cancelButton=new JButton("关闭");
                 jPanel.add(cancelButton);
+                this.setResizable(false);
             }
 
             //添加监听器
@@ -1860,6 +1879,7 @@ public class work extends JFrame {
             box.add(Box.createVerticalStrut(5));
             box.add(box7);
             getContentPane().add(box);
+            this.setResizable(false);
         }
 
         //添加监听器
