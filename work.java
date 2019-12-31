@@ -26,6 +26,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.category.DefaultCategoryDataset;
 import java.util.*;
+import java.util.List;
 
 public class work extends JFrame {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -43,6 +44,7 @@ public class work extends JFrame {
     private JMenuItem miNew;
     private JMenuItem miOpen;
     private JMenuItem miSave;
+    private JMenuItem miSaveAs;
     private JMenuItem miFont;
     private JMenuItem miQuit;
 
@@ -100,6 +102,7 @@ public class work extends JFrame {
         miNew = new JMenuItem("新建（N）", KeyEvent.VK_H);
         miOpen = new JMenuItem("打开（O）...", KeyEvent.VK_O);
         miSave = new JMenuItem("保存（S）", KeyEvent.VK_S);
+        miSaveAs =new JMenuItem("另存为");
         miFont = new JMenuItem("字体与颜色（F）", KeyEvent.VK_F);
         miQuit = new JMenuItem("退出（X）...", KeyEvent.VK_X);
 
@@ -112,6 +115,7 @@ public class work extends JFrame {
         mFile.add(miNew);
         mFile.add(miOpen);
         mFile.add(miSave);
+        mFile.add(miSaveAs);
         mFile.addSeparator();
         mFile.add(miFont);
         mFile.addSeparator();
@@ -175,7 +179,7 @@ public class work extends JFrame {
         setLocation((int) (dm.getWidth() - getWidth()) / 2, (int) (dm.getHeight() - getHeight()) / 2);
     }
 
-    //通讯录菜单设置响应
+    //通讯录菜单设置监听器
     private JMenu getJMenu() {
         mList.addMouseListener(new MouseAdapter() {
             @Override
@@ -192,7 +196,7 @@ public class work extends JFrame {
         return mList;
     }
 
-    //菜单按键响应
+    //菜单按键监听器
     private void addAction() {
         //文本文件求和响应
         sum.addActionListener(new ActionListener() {
@@ -263,6 +267,12 @@ public class work extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 exit();
+            }
+        });
+        miSaveAs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                saveAs();
             }
         });
     }
@@ -356,13 +366,14 @@ public class work extends JFrame {
         } else if (flag == 2 && this.currentPath != null) {
             int result = JOptionPane.showConfirmDialog(work.this, "是否将更改保存到", this.currentPath, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result == JOptionPane.OK_OPTION) {
-                this.saveAs();
+                this.save();
             } else if (result == JOptionPane.NO_OPTION) {
                 this.ta.setText("");
                 this.setTitle("201806061332——左佑——Java程序设计综合实验");
                 flag = 1;
             }
         } else if (flag == 3) {
+            this.currentPath="";
             this.ta.setText("");
             this.setTitle("201806061332——左佑——Java程序设计综合实验");
             flag = 1;
@@ -371,11 +382,12 @@ public class work extends JFrame {
 
     //保存文件
     private void save() {
-        if (this.currentPath == null) {
+        if (this.currentPath == null| this.flag == 1) {
             this.saveAs();
             if (this.currentPath == null) {
                 return;
             }
+            return;
         }
         FileWriter fw = null;
         try {
@@ -738,11 +750,11 @@ public class work extends JFrame {
             if (input.matches("\\d+")) {
                 //System.out.println("please enter a number");
                 if (input.matches("\\s+|\\s?"))
-                    System.out.println("Wrong input, please input again");
+                    jTextField2.setText("输入错误");
                 else {
                     int num = Integer.parseInt(input);
                     if (num >= 100) {
-                        System.out.println("Wrong input, please input again");
+                        jTextField2.setText("输入错误");
                     } else {
                         jTextField2.setText(format(num));
                     }
@@ -757,14 +769,14 @@ public class work extends JFrame {
                         if (x != -1)
                             jTextField2.setText(String.valueOf(x));
                         else
-                            System.out.println("Wrong input, please input again");
+                            jTextField2.setText("输入错误");
                     } catch (Exception WordException) {
-                        System.out.println("Wrong input, please input again");
+                        jTextField2.setText("输入错误");
                     }
                 } else
-                    System.out.println("Wrong input, please input again");
+                    jTextField2.setText("输入错误");
             } else {
-                System.out.println("Wrong input, please input again");
+                jTextField2.setText("输入错误");
             }
             if (input.equals("")) {
                 jTextField2.setText("");
@@ -1006,7 +1018,9 @@ public class work extends JFrame {
                         JOptionPane.showMessageDialog(null, "是回文数");
                     else
                         JOptionPane.showMessageDialog(null, "不是回文数");
-                }
+                }else
+                    JOptionPane.showMessageDialog(null, "不是回文数");
+
             } else {
                 JOptionPane.showMessageDialog(null, "输入错误");
             }
@@ -1223,6 +1237,8 @@ public class work extends JFrame {
                 }
             };
             jtable=new JTable(tableModel);
+            jtable.getTableHeader().setReorderingAllowed(false);
+            jtable.getTableHeader().setResizingAllowed(false);
             jScrollPane.setViewportView(jtable);
             add(jPanel,BorderLayout.SOUTH);
             add(jScrollPane, BorderLayout.NORTH);
@@ -1585,50 +1601,57 @@ public class work extends JFrame {
                 searchButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        search(tableModel);
+                        search();
                     }
                 });
             }
 
             //查找函数实现
-            private void search(DefaultTableModel tableModel){
+            private void search(){
                 JFrame jFrame=new JFrame();
                 Toolkit toolkit = Toolkit.getDefaultToolkit();
                 Dimension dimension = toolkit.getScreenSize();
                 jFrame.setSize((int) (dimension.width * 0.5), (int) (dimension.height * 0.5));
                 jFrame.setLocationRelativeTo(null);
                 JTable table=new JTable();
-                table.setModel(tableModel);
+                DefaultTableModel tableModel1=tableModel;
+                table.setModel(tableModel1);
                 table.setAutoCreateRowSorter(true);
                 JScrollPane jScrollPane=new JScrollPane();
                 jScrollPane.setViewportView(table);
                 jFrame.add(jScrollPane);
                 jFrame.setVisible(true);
-                TableRowSorter<DefaultTableModel> nameSorter=new TableRowSorter<DefaultTableModel>(tableModel);
-                TableRowSorter<DefaultTableModel> sexSorter=new TableRowSorter<DefaultTableModel>(tableModel);
-                TableRowSorter<DefaultTableModel> phoneSorter=new TableRowSorter<DefaultTableModel>(tableModel);
-                TableRowSorter<DefaultTableModel> emailSorter=new TableRowSorter<DefaultTableModel>(tableModel);
-                TableRowSorter<DefaultTableModel> qqSorter=new TableRowSorter<DefaultTableModel>(tableModel);
+                List<RowFilter<Object,Object>> filters = new ArrayList<RowFilter<Object,Object>>();
+                TableRowSorter<DefaultTableModel> sorter=new TableRowSorter<DefaultTableModel>(tableModel1);
+                RowFilter filter;
+                RowFilter nameSorter;
+                RowFilter sexSorter;
+                RowFilter phoneSorter;
+                RowFilter emailSorter;
+                RowFilter qqSorter;
                 if(!name.getText().equals("")){
-                    nameSorter.setRowFilter(RowFilter.regexFilter(name.getText()));
-                    table.setRowSorter(nameSorter);
+                    nameSorter= RowFilter.regexFilter(name.getText(),1);
+                    filters.add(nameSorter);
                 }
                 if(!sex.getText().equals("")){
-                    sexSorter.setRowFilter(RowFilter.regexFilter(sex.getText()));
-                    table.setRowSorter(sexSorter);
+                    sexSorter= RowFilter.regexFilter(sex.getText(),2);
+                    filters.add(sexSorter);
                 }
                 if(!phone.getText().equals("")){
-                    phoneSorter.setRowFilter(RowFilter.regexFilter(phone.getText()));
-                    table.setRowSorter(phoneSorter);
+                    phoneSorter= RowFilter.regexFilter(phone.getText(),3);
+                    filters.add(phoneSorter);
                 }
                 if(!email.getText().equals("")){
-                    emailSorter.setRowFilter(RowFilter.regexFilter(email.getText()));
-                    table.setRowSorter(emailSorter);
+                    emailSorter= RowFilter.regexFilter(email.getText(),4);
+                    filters.add(emailSorter);
                 }
                 if(!qq.getText().equals("")){
-                    qqSorter.setRowFilter(RowFilter.regexFilter(qq.getText()));
-                    table.setRowSorter(qqSorter);
+                    qqSorter= RowFilter.regexFilter(qq.getText(),5);
+                    filters.add(qqSorter);
                 }
+                filter=RowFilter.andFilter(filters);
+                sorter.setRowFilter(filter);
+                table.setRowSorter(sorter);
             }
         }
     }
@@ -1649,9 +1672,9 @@ public class work extends JFrame {
         private JRadioButton chinaButton = null;
         private JRadioButton englishButton = null;
         private JRadioButton numberButton = null;
-        private JList fontList = null;
-        private JList styleList = null;
-        private JList sizeList = null;
+        private JList<String> fontList = null;
+        private JList<String> styleList = null;
+        private JList<String> sizeList = null;
         private JButton cancelButton = null;
         private JButton approveButton = null;
         private JButton colorButton = null;
@@ -1788,9 +1811,9 @@ public class work extends JFrame {
             bg.add(chinaButton);
             bg.add(englishButton);
             bg.add(numberButton);
-            fontList = new JList(fontArray);
-            styleList = new JList(styleArray);
-            sizeList = new JList(sizeArray);
+            fontList = new JList<>(fontArray);
+            styleList = new JList<>(styleArray);
+            sizeList = new JList<>(sizeArray);
             approveButton = new JButton("确定");
             cancelButton = new JButton("取消");
             colorButton = new JButton("字体颜色");
